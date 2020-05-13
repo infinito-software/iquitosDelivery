@@ -1,0 +1,20 @@
+{
+  "name": "iquitos-delivery_api",
+  "version": "0.0.0",
+  "description": "IquitosDelivery_API",
+  "main": "app.js",
+  "author": {
+    "name": ""
+  },
+  "scripts": {
+    "start": "node src/app.js" 
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-jwt": "^5.3.3",
+    "jsonwebtoken": "^8.5.1",
+    "mssql": "^5.1.0",
+    "tedious": "^6.6.0"
+  }
+}
