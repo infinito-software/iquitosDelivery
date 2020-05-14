@@ -451,8 +451,8 @@ router.post('/usuario', jwtMW, async (req, res, next) => {
                         + ' UPDATE Usuario set Nombre = @Nombre, Direccion = @Direccion WHERE FBID = @FBID'
                         + ' ELSE'
                     + ' INSERT INTO Usuario (FBID, Celular, Nombre, Direccion, Tema) OUTPUT Inserted.FBID, Inserted.Celular, Inserted.Nombre, Inserted.Direccion, Inserted.Tema'
-                        + ' VALUES(@FBID, @Celular, @Nombre, @Direccion, 1)'*/
-                );
+                        + ' VALUES(@FBID, @Celular, @Nombre, @Direccion, 1)'
+                );*/
 
                 console.log(queryResult); //Debug to see
 
