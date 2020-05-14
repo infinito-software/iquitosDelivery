@@ -445,13 +445,13 @@ router.post('/usuario', jwtMW, async (req, res, next) => {
                     .input('Nombre', sql.NVarChar, nombre)
                     .input('Direccion', sql.NVarChar, direccion)
                     .input('FBID', sql.NVarChar, fbid)
-                    .input('Tema', sql.NVarChar, 0)
+                    .input('Tema', sql.Int, 0)
                     .execute('PA_POST_GET_Usuario')
-                    .query('IF EXISTS(SELECT * FROM Usuario WHERE FBID = @FBID)'
+                    /*.query('IF EXISTS(SELECT * FROM Usuario WHERE FBID = @FBID)'
                         + ' UPDATE Usuario set Nombre = @Nombre, Direccion = @Direccion WHERE FBID = @FBID'
                         + ' ELSE'
-                        + ' INSERT INTO Usuario (FBID, Celular, Nombre, Direccion) OUTPUT Inserted.FBID, Inserted.Celular, Inserted.Nombre, Inserted.Direccion'
-                        + ' VALUES(@FBID, @Celular, @Nombre, @Direccion)'
+                    + ' INSERT INTO Usuario (FBID, Celular, Nombre, Direccion, Tema) OUTPUT Inserted.FBID, Inserted.Celular, Inserted.Nombre, Inserted.Direccion, Inserted.Tema'
+                        + ' VALUES(@FBID, @Celular, @Nombre, @Direccion, 1)'*/
                 );
 
                 console.log(queryResult); //Debug to see
