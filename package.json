@@ -1,6 +1,6 @@
 {
   "name": "iquitos-delivery_api",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "IquitosDelivery_API",
   "main": "app.js",
   "author": {
