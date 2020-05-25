@@ -123,6 +123,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="uploads\" />
     <Folder Include="routes\" />
     <Folder Include="public\" />
   </ItemGroup>

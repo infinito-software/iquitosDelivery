@@ -13,4 +13,4 @@ const poolPromise = new sql.ConnectionPool(config)
         return pool
     }).catch(err => console.log('Conexion Fallida', err))
 
-module.exports = {sql,poolPromise}
+module.exports = { sql, poolPromise }
