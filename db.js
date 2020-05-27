@@ -1,4 +1,4 @@
-﻿const sql = require('mssql')
+﻿cconst sql = require('mssql')
 var config = {
     user: 'DB_A5E46E_iquitosdelivery_admin',
     password: 'INFINITO0405',

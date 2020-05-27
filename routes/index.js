@@ -781,7 +781,9 @@ router.get('/restaurante', jwtMW, async (req, res, next) => {
                 const pool = await poolPromise
                 const queryResult = await pool.request()
                     .input('Opcion', sql.Int, 1)
-                    .input('RestauranteId', sql.Int, 0)                   
+                    .input('RestauranteId', sql.Int, 0) 
+                    .input('IdTipEmpresa', sql.Int, 0)
+                    .input('SearchQuery', sql.NVarChar, ' ')
                     .input('lat', sql.Float, 0)
                     .input('lng', sql.Float, 0)
                     .input('distance', sql.Int, 0)
@@ -808,7 +810,9 @@ router.get('/restaurantePorId', jwtMW, async (req, res, next) => {
                 const pool = await poolPromise
                 const queryResult = await pool.request()
                     .input('Opcion', sql.Int, 2)
-                    .input('RestauranteId', sql.Int, restaurante_id)                   
+                    .input('RestauranteId', sql.Int, restaurante_id)  
+                    .input('IdTipEmpresa', sql.Int, 0)
+                    .input('SearchQuery', sql.NVarChar, ' ')
                     .input('lat', sql.Float, 0)
                     .input('lng', sql.Float, 0)
                     .input('distance', sql.Int, 0)
@@ -842,6 +846,8 @@ router.get('/restauranteCerca', jwtMW, async (req, res, next) => {
                 const queryResult = await pool.request()
                     .input('Opcion', sql.Int, 3) //Opcion 3
                     .input('RestauranteId', sql.Int, 0) 
+                    .input('IdTipEmpresa', sql.Int, 0)
+                    .input('SearchQuery', sql.NVarChar, ' ')
                     .input('lat', sql.Float, user_lat)
                     .input('lng', sql.Float, user_lng)
                     .input('distance', sql.Int, distance)
@@ -870,6 +876,74 @@ router.get('/restauranteCerca', jwtMW, async (req, res, next) => {
         }
     
 }); 
+router.get('/restaurantePorTipo', jwtMW, async (req, res, next) => {
+
+    var tipoempresa_id = req.query.tipoEmpresaId;
+    if (tipoempresa_id != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('Opcion', sql.Int, 4)
+                .input('RestauranteId', sql.Int, 0)
+                .input('IdTipEmpresa', sql.Int, tipoempresa_id)
+                .input('SearchQuery', sql.NVarChar, ' ')
+                .input('lat', sql.Float, 0)
+                .input('lng', sql.Float, 0)
+                .input('distance', sql.Int, 0)
+                .execute('PA_GET_Restaurante')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing restauranteId in query" }));
+    }
+
+}); 
+router.get('/buscarEmpresa', jwtMW, async (req, res, next) => {
+
+    var search_query = req.query.Nombre;
+    if (search_query != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('Opcion', sql.Int, 5)
+                .input('RestauranteId', sql.Int, 0)
+                .input('IdTipEmpresa', sql.Int, 0)
+                .input('SearchQuery', sql.NVarChar, search_query)
+                .input('lat', sql.Float, 0)
+                .input('lng', sql.Float, 0)
+                .input('distance', sql.Int, 0)
+                .execute('PA_GET_Restaurante')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing restauranteId in query" }));
+    }
+
+}); 
+
+
 
 //=========================================================================
 // TABLA MENU
@@ -1320,12 +1394,10 @@ router.get('/detPedidosPorRestaurante', jwtMW, async (req, res, next) => {
             try {
                 const pool = await poolPromise
                 const queryResult = await pool.request()
+                    .input('Opcion', sql.Int, 1)
                     .input('OrderId', sql.Int, order_id)
-                    .query('SELECT det.PedidoId as pedidoId, det.ItemId as itemId, det.Cantidad as cantidad, det.Tamaño as tamaño, det.Extra as extra, ped.UsuarioFBID as usuarioFBID, pro.Nombre as nombre, pro.Descripcion as descripcion, pro.Imagen as imagen'
-                         + ' FROM DetallePedido det'
-                         + ' INNER JOIN Pedido ped ON ped.PedidoId = det.PedidoId'
-                         + ' INNER JOIN Producto pro ON det.ItemId = pro.ID'
-                         + ' WHERE det.PedidoId = @OrderId')
+                    .execute('PA_GET_DetPedido')
+                   
 
                 if (queryResult.recordset.length > 0) {
                     res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
@@ -1517,8 +1589,10 @@ router.get('/detPedidos', jwtMW, async (req, res, next) => {
             try {
                 const pool = await poolPromise
                 const queryResult = await pool.request()
+                    .input('Opcion', sql.Int, 2)
                     .input('OrderId', sql.Int, order_id)
-                    .query('SELECT PedidoId as pedidoId, ItemId as itemId, Cantidad as cantidad, Precio as precio, Descuento as descuento, Tamaño as tamaño, Extra as extra, PrecioExtra as precioExtra FROM DetallePedido WHERE PedidoId = @OrderId ')
+                    .execute('PA_GET_DetPedido')
+                    //.query('SELECT PedidoId as pedidoId, ItemId as itemId, Cantidad as cantidad, Precio as precio, iif(Tamaño is null,  , Tamaño) as tamaño, Extra as extra, PrecioExtra as precioExtra FROM DetallePedido WHERE PedidoId = @OrderId  ')
 
                 if (queryResult.recordset.length > 0) {
                     res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
@@ -1548,7 +1622,11 @@ router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
         var transaccion_id = req.body.transaccionId;
         var cod = (req.body.cod == "true");
         var precio_Total = req.body.precioTotal;
-        var num_Items = req.body.numItems;        
+        var num_Items = req.body.numItems; 
+        var comprobante = req.body.comprobante; 
+        var nroDocComprobante = req.body.nroDocComprobante; 
+        var nomClienteComprobante = req.body.nomClienteComprobante; 
+        var dirClienteComprobante = req.body.dirClienteComprobante; 
         //var fbid_usuario = req.body.fbidUsuario;
 
         var authorization = req.headers.authorization, decoded;
@@ -1559,8 +1637,10 @@ router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
             return res.status(401).send('Unauthorized');
         }
 
-        var fbid_usuario = decoded.fbid;
+    var fbid_usuario = decoded.fbid;
 
+    if (num_Items > 0)
+    {
         if (fbid_usuario != null) {
             try {
                 const pool = await poolPromise
@@ -1575,10 +1655,14 @@ router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
                     .input('COD', sql.Bit, cod == true ? 1 : 0)
                     .input('PrecioTotal', sql.Float, precio_Total)
                     .input('NumItems', sql.Int, num_Items)
+                    .input('Comprobante', sql.NVarChar, comprobante)
+                    .input('NroDocComprobante', sql.NVarChar, nroDocComprobante)
+                    .input('NomClienteComprobante', sql.NVarChar, nomClienteComprobante)
+                    .input('DirClienteComprobante', sql.NVarChar, dirClienteComprobante)
                     .query('INSERT INTO Pedido'
-                        + '(UsuarioFBID, Celular, Nombre, Direccion, Estado, Fecha, RestauranteId, TransaccionId, COD, Total, NumItems)'
+                        + '(UsuarioFBID, Celular, Nombre, Direccion, Estado, Fecha, RestauranteId, TransaccionId, COD, Total, NumItems, Comprobante, NroDocComprobante, NomClienteComprobante, DirClienteComprobante)'
                         + 'VALUES'
-                        + '(@FBID_USUARIO, @CelularPedido , @NombrePedido, @DireccionPedido , 0, @FechaPedido , @RestauranteId , @TransaccionId, @COD, @PrecioTotal, @NumItems)'
+                        + '(@FBID_USUARIO, @CelularPedido , @NombrePedido, @DireccionPedido , 0, @FechaPedido , @RestauranteId , @TransaccionId, @COD, @PrecioTotal, @NumItems , @Comprobante, @NroDocComprobante, @NomClienteComprobante, @DirClienteComprobante)'
                         + ' SELECT TOP 1 PedidoId as orderNumber FROM Pedido WHERE UsuarioFBID = @FBID_USUARIO ORDER BY orderNumber DESC ');
 
 
@@ -1590,13 +1674,19 @@ router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
                 }
 
             }
+
             catch (err) {
                 res.status(500) //Internal Server Error
                 res.send(JSON.stringify({ success: false, message: err.message }));
             }
-        } else {
-            res.send(JSON.stringify({ success: false, message: "Missing fbidPedido in body of POST request" }));
+
         }
+        else {
+
+            res.send(JSON.stringify({ success: false, message: "Missing fbidPedido in body of POST request" }));
+
+        }  
+    }   
 
 })
 
