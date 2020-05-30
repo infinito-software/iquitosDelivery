@@ -1050,12 +1050,13 @@ router.get('/productosPorId', jwtMW, async (req, res, next) => {
 router.get('/BuscarProducto', jwtMW, async (req, res, next) => {
 
         var search_query = req.query.foodName;
+        var menu_id = req.query.menuId;
         if (search_query != null) {
             try {
                 const pool = await poolPromise
                 const queryResult = await pool.request()
                     .input('Opcion', sql.Int, 3) //Opcion 3
-                    .input('CategoriaId', sql.Int, 0)
+                    .input('CategoriaId', sql.Int, menu_id)
                     .input('FoodId', sql.Int, 0)
                     .input('SearchQuery', sql.NVarChar, '%' + search_query + '%')
                     .input('RestauranteId', sql.Int, 0)
