@@ -1049,8 +1049,9 @@ router.get('/productosPorId', jwtMW, async (req, res, next) => {
 });
 router.get('/BuscarProducto', jwtMW, async (req, res, next) => {
 
-        var search_query = req.query.foodName;
         var menu_id = req.query.menuId;
+        var search_query = req.query.foodName;
+        
         if (search_query != null) {
             try {
                 const pool = await poolPromise
