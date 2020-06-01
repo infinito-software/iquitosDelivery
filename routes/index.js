@@ -646,7 +646,7 @@ router.get('/usuario', jwtMW, async (req, res, next) => {
 router.get('/usuarioPorCelular', jwtMW, async (req, res, next) => {
 
     var celular = req.query.Celular;
-    var contraseña = req.body.Contraseña;
+    var contraseña = req.query.Contraseña;
     if (celular != null) {
         try {
             const pool = await poolPromise
