@@ -402,63 +402,6 @@ router.post('/restaurantePropietario', jwtMW, async (req, res, next) => {
 
 
 })
-router.get('/restaurantePropietarioLogin', jwtMW, async (req, res, next) => {
-
-    var authorization = req.headers.authorization, decoded;
-    try {
-        decoded = jwt.verify(authorization.split(' ')[1], SECRET_KEY);
-    }
-    catch (e) {
-        return res.status(401).send('Unauthorized');
-    }
-
-    var nroDocumento = req.query.nroDocumento;
-    var contraseña = req.query.contraseña;
-    var fbid = decoded.fbid;
-    if (fbid != null) {
-        try {
-            const pool = await poolPromise
-            const queryResult = await pool.request()
-                .input('Opcion', sql.Int, 3)
-                .input('Nombre', sql.NVarChar, ' ')
-                .input('Celular', sql.NVarChar, ' ')
-                .input('NroDocumento', sql.NVarChar, nroDocumento)
-                .input('Direccion', sql.NVarChar, ' ')
-                .input('Contraseña', sql.NVarChar, contraseña)
-                .input('IdTipoEmpresa', sql.Int, 0)
-                .input('HoraApertura', sql.NVarChar, ' ')
-                .input('HoraCierre', sql.NVarChar, ' ')
-                .input('PedidoMinimo', sql.Int, 0)
-                .input('Correo', sql.NVarChar, ' ')
-                .input('AtencionLunes', sql.Bit, 0)
-                .input('AtencionMartes', sql.Bit, 0)
-                .input('AtencionMiercoles', sql.Bit, 0)
-                .input('AtencionJueves', sql.Bit, 0)
-                .input('AtencionViernes', sql.Bit, 0)
-                .input('AtencionSabado', sql.Bit, 0)
-                .input('AtencionDomingo', sql.Bit, 0)
-                .input('Imagen', sql.NVarChar, ' ')
-                .input('FBID', sql.NVarChar, fbid)
-                .execute('PA_POST_GET_Restaurante_Propietario')
-
-
-            if (queryResult.recordset.length > 0) {
-                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
-            }
-            else {
-                res.send(JSON.stringify({ success: false, message: "Empty" }));
-            }
-        }
-        catch (err) {
-            res.status(500) //Internal Server Error
-            res.send(JSON.stringify({ success: false, message: err.message }));
-        }
-    }
-    else {
-        res.send(JSON.stringify({ success: false, message: "Missing fbid in query" }));
-    }
-
-});
 
 
 //=========================================================================
@@ -677,6 +620,8 @@ router.get('/usuario', jwtMW, async (req, res, next) => {
                 .input('Nombre', sql.NVarChar, ' ')
                 .input('Direccion', sql.NVarChar, ' ')
                 .input('Referencia', sql.NVarChar, ' ')
+                .input('Correo', sql.NVarChar, ' ')
+                .input('Contraseña', sql.NVarChar, ' ')
                 .input('Tema', sql.NVarChar, 0)
                 .execute('PA_POST_GET_Usuario')
 
@@ -701,6 +646,7 @@ router.get('/usuario', jwtMW, async (req, res, next) => {
 router.get('/usuarioPorCelular', jwtMW, async (req, res, next) => {
 
     var celular = req.query.Celular;
+    var contraseña = req.body.Contraseña;
     if (celular != null) {
         try {
             const pool = await poolPromise
@@ -711,6 +657,8 @@ router.get('/usuarioPorCelular', jwtMW, async (req, res, next) => {
                 .input('Nombre', sql.NVarChar, ' ')
                 .input('Direccion', sql.NVarChar, ' ')
                 .input('Referencia', sql.NVarChar, ' ')
+                .input('Correo', sql.NVarChar, ' ')
+                .input('Contraseña', sql.NVarChar, contraseña)
                 .input('Tema', sql.Int, 0)
                 .execute('PA_POST_GET_Usuario')
 
@@ -737,6 +685,8 @@ router.post('/usuario', jwtMW, async (req, res, next) => {
     var nombre = req.body.Nombre;
     var direccion = req.body.Direccion;
     var referencia = req.body.Referencia;
+    var correo = req.body.Correo;
+    var contraseña = req.body.Contraseña;
 
     var authorization = req.headers.authorization, decoded;
     try {
@@ -757,6 +707,8 @@ router.post('/usuario', jwtMW, async (req, res, next) => {
                 .input('Nombre', sql.NVarChar, nombre)
                 .input('Direccion', sql.NVarChar, direccion)
                 .input('Referencia', sql.NVarChar, referencia)
+                .input('Correo', sql.NVarChar, correo)
+                .input('Contraseña', sql.NVarChar, contraseña)
                 .input('FBID', sql.NVarChar, fbid)
                 .input('Tema', sql.NVarChar, 0)
                 .execute('PA_POST_GET_Usuario')
@@ -802,6 +754,8 @@ router.put('/usuario', jwtMW, async (req, res, next) => {
                 .input('Nombre', sql.NVarChar, ' ')
                 .input('Direccion', sql.NVarChar, ' ')
                 .input('Referencia', sql.NVarChar, ' ')
+                .input('Correo', sql.NVarChar, ' ')
+                .input('Contraseña', sql.NVarChar, ' ')
                 .input('FBID', sql.NVarChar, fbid)
                 .input('Tema', sql.NVarChar, tema)
                 .execute('PA_POST_GET_Usuario')
@@ -994,6 +948,7 @@ router.get('/buscarEmpresa', jwtMW, async (req, res, next) => {
     }
 
 });
+
 
 
 //=========================================================================
