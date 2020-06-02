@@ -1022,6 +1022,37 @@ router.get('/productos', jwtMW, async (req, res, next) => {
     }
 
 });
+router.get('/productosDesactivos', jwtMW, async (req, res, next) => {
+
+    var menu_id = req.query.menuId;
+    if (menu_id != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('Opcion', sql.Int, 5) //Opcion 5
+                .input('CategoriaId', sql.Int, menu_id)
+                .input('FoodId', sql.Int, 0)
+                .input('SearchQuery', sql.NVarChar, ' ')
+                .input('RestauranteId', sql.Int, 0)
+                .execute('PA_GET_Producto')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing menuId in query" }));
+    }
+
+});
 router.get('/productosPorId', jwtMW, async (req, res, next) => {
 
     var food_id = req.query.foodId;
@@ -1171,7 +1202,7 @@ router.put('/producto', jwtMW, async (req, res, next) => {
     var extraId = req.body.extraId;
     var nombre = req.body.nombre;
     var descripcion = req.body.descripcion;
-    var imagen = req.body.imagen;
+    var imagenruta = req.body.imagenruta;
     var precio = req.body.precio;
     var contienePresentacion = req.body.contienePresentacion;
     var contieneExtra = req.body.contieneExtra;
@@ -1188,11 +1219,44 @@ router.put('/producto', jwtMW, async (req, res, next) => {
             .input('ExtraId', sql.Int, extraId)
             .input('Nombre', sql.NVarChar, nombre)
             .input('Descripcion', sql.NVarChar, descripcion)
-            .input('Imagen', sql.Image, new Image(imagen))
+            .input('Imagen', sql.Image, imagenruta)
             .input('Precio', sql.Float, precio)
             .input('ContienePresentacion', sql.Bit, contienePresentacion)
             .input('ContieneExtra', sql.Bit, contieneExtra)
             .input('Descuento', sql.Float, descuento)
+            .execute('PA_POST_PUT_Producto')
+
+        if (queryResult.rowsAffected != null)
+            res.end(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
+router.put('/productoEstado', jwtMW, async (req, res, next) => {
+
+    var productoId = req.body.productoId;
+    var estado = req.body.estado;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 3) //Opcion 3
+            .input('ProductoId', sql.Int, productoId)
+            .input('CategoriaId', sql.Int, 0)
+            .input('PresentacionId', sql.Int, 0)
+            .input('PrecioPresentacion', sql.Float, 0)
+            .input('ExtraId', sql.Int, 0)
+            .input('Nombre', sql.NVarChar, ' ')
+            .input('Descripcion', sql.NVarChar, ' ')
+            .input('Imagen', sql.Image, ' ')
+            .input('Precio', sql.Float, precio)
+            .input('ContienePresentacion', sql.Bit, 0)
+            .input('ContieneExtra', sql.Bit, 0)
+            .input('Descuento', sql.Float, 0)
+            .input('Descuento', sql.Float, estado)
             .execute('PA_POST_PUT_Producto')
 
         if (queryResult.rowsAffected != null)
@@ -1220,8 +1284,6 @@ router.get('/presentacion', jwtMW, async (req, res, next) => {
                 .input('Opcion', sql.Int, 1)
                 .input('FoodId', sql.Int, food_id)
                 .execute('PA_GET_Presentacion')
-            /*.query('Select ID as id, Descripcion as descripcion, PrecioExtra as precioTamaño FROM Tamaño WHERE ID IN'
-            +' (SELECT TamañoId FROM Producto_Tamaño WHERE ProductoId = @FoodId )')*/
 
             if (queryResult.recordset.length > 0) {
                 res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
