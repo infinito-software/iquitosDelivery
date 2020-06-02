@@ -1254,7 +1254,7 @@ router.put('/productoEstado', jwtMW, async (req, res, next) => {
             .input('Nombre', sql.NVarChar, ' ')
             .input('Descripcion', sql.NVarChar, ' ')
             .input('Imagen', sql.Image, ' ')
-            .input('Precio', sql.Float, precio)
+            .input('Precio', sql.Float, 0)
             .input('ContienePresentacion', sql.Bit, 0)
             .input('ContieneExtra', sql.Bit, 0)
             .input('Descuento', sql.Float, 0)
