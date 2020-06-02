@@ -1178,7 +1178,7 @@ router.post('/producto', jwtMW, upload.single('imagen'), async (req, res, next) 
             .input('ContienePresentacion', sql.Bit, contienePresentacion)
             .input('ContieneExtra', sql.Bit, contieneExtra)
             .input('Descuento', sql.Int, descuento)
-            .input('Estado', sql.Bit, 1)
+            .input('Estado', sql.NVarChar, ' ')
             .execute('PA_POST_PUT_Producto')
 
         if (queryResult.rowsAffected != null)
@@ -1225,7 +1225,7 @@ router.put('/producto', jwtMW, async (req, res, next) => {
             .input('ContienePresentacion', sql.Bit, contienePresentacion)
             .input('ContieneExtra', sql.Bit, contieneExtra)
             .input('Descuento', sql.Float, descuento)
-            .input('Estado', sql.Bit, 1)
+            .input('Estado', sql.NVarChar, ' ')
             .execute('PA_POST_PUT_Producto')
 
         if (queryResult.rowsAffected != null)
@@ -1258,7 +1258,7 @@ router.put('/productoEstado', jwtMW, async (req, res, next) => {
             .input('ContienePresentacion', sql.Bit, 0)
             .input('ContieneExtra', sql.Bit, 0)
             .input('Descuento', sql.Float, 0)
-            .input('Estado', sql.Bit, estado)
+            .input('Estado', sql.NVarChar, estado)
             .execute('PA_POST_PUT_Producto')
 
         if (queryResult.rowsAffected != null)
