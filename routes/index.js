@@ -402,6 +402,73 @@ router.post('/restaurantePropietario', jwtMW, async (req, res, next) => {
 
 
 })
+router.get('/restaurantePropietarioLogin', jwtMW, async (req, res, next) => {
+
+    try {
+
+        var nroDocumento = req.query.NroDocumento;
+        var contraseña = req.query.Contraseña;
+
+        var authorization = req.headers.authorization, decoded;
+        try {
+            decoded = jwt.verify(authorization.split(' ')[1], SECRET_KEY);
+        }
+        catch (e) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        var fbid = decoded.fbid;
+
+        if (fbid != null) {
+            try {
+                const pool = await poolPromise
+                const queryResult = await pool.request()
+                    .input('Opcion', sql.Int, 3)
+                    .input('Nombre', sql.NVarChar, ' ')
+                    .input('Celular', sql.NVarChar, ' ')
+                    .input('NroDocumento', sql.NVarChar, nroDocumento)
+                    .input('Direccion', sql.NVarChar, ' ')
+                    .input('Contraseña', sql.NVarChar, contraseña)
+                    .input('IdTipoEmpresa', sql.Int, 0)
+                    .input('HoraApertura', sql.NVarChar, ' ')
+                    .input('HoraCierre', sql.NVarChar, ' ')
+                    .input('PedidoMinimo', sql.Int, 0)
+                    .input('Correo', sql.NVarChar, ' ')
+                    .input('AtencionLunes', sql.NVarChar, ' ')
+                    .input('AtencionMartes', sql.NVarChar, ' ')
+                    .input('AtencionMiercoles', sql.NVarChar, ' ')
+                    .input('AtencionJueves', sql.NVarChar, ' ')
+                    .input('AtencionViernes', sql.NVarChar, ' ')
+                    .input('AtencionSabado', sql.NVarChar, ' ')
+                    .input('AtencionDomingo', sql.NVarChar, ' ')
+                    .input('Imagen', sql.NVarChar, ' ')
+                    .input('FBID', sql.NVarChar, fbid)
+                    .execute('PA_POST_GET_Restaurante_Propietario')
+
+                if (queryResult.recordset.length > 0) {
+                    res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+                }
+                else {
+                    res.send(JSON.stringify({ success: false, message: "Empty" }));
+                }
+
+
+            }
+            catch (err) {
+                res.status(500) //Internal Server Error
+                res.send(JSON.stringify({ success: false, message: err.message }));
+            }
+        } else {
+            res.send(JSON.stringify({ success: false, message: "Missing fbid in JWT" }));
+        }
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+
+})
 
 
 //=========================================================================
@@ -1147,7 +1214,7 @@ router.get('/productosPorRestauranteId', jwtMW, async (req, res, next) => {
     }
 
 });
-router.post('/producto', jwtMW, upload.single('imagen'), async (req, res, next) => {
+router.post('/producto', jwtMW, async (req, res, next) => {
 
     var productoId = req.body.productoId;
     var categoriaId = req.body.categoriaId;
@@ -1178,7 +1245,7 @@ router.post('/producto', jwtMW, upload.single('imagen'), async (req, res, next) 
             .input('ContienePresentacion', sql.Bit, contienePresentacion)
             .input('ContieneExtra', sql.Bit, contieneExtra)
             .input('Descuento', sql.Int, descuento)
-            .input('Estado', sql.NVarChar, ' ')
+            .input('Estado', sql.Bit, 1)
             .execute('PA_POST_PUT_Producto')
 
         if (queryResult.rowsAffected != null)
@@ -1186,12 +1253,18 @@ router.post('/producto', jwtMW, upload.single('imagen'), async (req, res, next) 
         else {
             res.send(JSON.stringify({ success: false, message: err.message }))
         }
-        n
+
     }
     catch (err) {
         res.status(500) //Internal Server Error
         res.send(JSON.stringify({ success: false, message: err.message }));
     }
+
+})
+router.post('/subirImagenproducto', jwtMW, upload.single('imagen'), async (req, res, next) => {
+
+    console.log(req.file);
+
 
 })
 router.put('/producto', jwtMW, async (req, res, next) => {
@@ -1225,7 +1298,7 @@ router.put('/producto', jwtMW, async (req, res, next) => {
             .input('ContienePresentacion', sql.Bit, contienePresentacion)
             .input('ContieneExtra', sql.Bit, contieneExtra)
             .input('Descuento', sql.Float, descuento)
-            .input('Estado', sql.NVarChar, ' ')
+            .input('Estado', sql.Bit, 1)
             .execute('PA_POST_PUT_Producto')
 
         if (queryResult.rowsAffected != null)
@@ -1258,7 +1331,7 @@ router.put('/productoEstado', jwtMW, async (req, res, next) => {
             .input('ContienePresentacion', sql.Bit, 0)
             .input('ContieneExtra', sql.Bit, 0)
             .input('Descuento', sql.Float, 0)
-            .input('Estado', sql.NVarChar, estado)
+            .input('Estado', sql.Bit, estado)
             .execute('PA_POST_PUT_Producto')
 
         if (queryResult.rowsAffected != null)
