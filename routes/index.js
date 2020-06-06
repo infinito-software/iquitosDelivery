@@ -1403,6 +1403,91 @@ router.get('/Allpresentaciones', jwtMW, async (req, res, next) => {
 });
 
 //=========================================================================
+// TABLA SLIDERS
+// GET
+//=========================================================================
+
+router.get('/slider', jwtMW, async (req, res, next) => {
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 1)
+            .execute('PA_GET_Slider')
+
+        if (queryResult.recordset.length > 0) {
+            res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+        }
+        else {
+            res.send(JSON.stringify({ success: false, message: "Empty" }));
+        }
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+});
+router.post('/slider', jwtMW, async (req, res, next) => {
+
+    var imagen = req.body.imagen;
+    var rutaWeb = req.body.rutaWeb;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Imagen', sql.NVarChar, imagen)
+            .input('RutaWeb', sql.Int, rutaWeb)
+            .execute('PA_POST_Slider')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
+
+//=========================================================================
+// TABLA Valoracion_Empresa
+// GET
+//=========================================================================
+
+router.post('/valoracionEmpresa', jwtMW, async (req, res, next) => {
+
+    var authorization = req.headers.authorization, decoded;
+    try {
+        decoded = jwt.verify(authorization.split(' ')[1], SECRET_KEY);
+    }
+    catch (e) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    var fbid = decoded.fbid;
+    var empresaId = req.body.empresaId;
+    var valoracion = req.body.valoracion;
+    var reseña = req.body.reseña;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('FBID', sql.NVarChar, fbid)
+            .input('EmpresaId', sql.Int, empresaId)
+            .input('Valoracion', sql.Float, valoracion)
+            .input('Reseña', sql.NVarChar, reseña)
+            .execute('PA_POST_ValoracionEmpresa')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
+
+//=========================================================================
 // TABLA EXTRAS
 // GET
 //=========================================================================
