@@ -1020,7 +1020,7 @@ router.get('/buscarEmpresa', jwtMW, async (req, res, next) => {
 
 //=========================================================================
 // TABLA MENU
-// GET
+// GET / POST
 //=========================================================================
 
 router.get('/categoria', jwtMW, async (req, res, next) => {
@@ -1052,10 +1052,40 @@ router.get('/categoria', jwtMW, async (req, res, next) => {
     }
 
 });
+router.post('/categoria', jwtMW, async (req, res, next) => {
+
+    var restauranteid = req.body.restauranteid;
+    var nombreCategoria = req.body.nombre;
+    var descripcionCategoria = req.body.descripcion;
+    var color1 = req.body.color1;
+    var color2 = req.body.color2;
+    var imagen = req.body.imagen;
+
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 1)
+            .input('RestauranteId', sql.Int, restauranteid)
+            .input('NombreCategoria', sql.NVarChar, nombreCategoria)
+            .input('DescripcionCategoria', sql.NVarChar, descripcionCategoria)
+            .input('Color1', sql.NVarChar, color1)
+            .input('Color2', sql.NVarChar, color2)
+            .input('Imagen', sql.NVarChar, imagen)
+            .execute('PA_POST_PUT_Categoria')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
 
 //=========================================================================
 // TABLA PRODUCTOS
-// GET
+// GET / POST / PUT
 //=========================================================================
 
 router.get('/productos', jwtMW, async (req, res, next) => {
@@ -1183,6 +1213,38 @@ router.get('/BuscarProducto', jwtMW, async (req, res, next) => {
     }
 
 });
+router.get('/BuscarProductoPorRestaurante', jwtMW, async (req, res, next) => {
+
+    var search_query = req.query.foodName;
+    var restauranteId = req.query.restauranteId;
+    if (search_query != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('Opcion', sql.Int, 6) //Opcion 6
+                .input('CategoriaId', sql.Int, 0)
+                .input('FoodId', sql.Int, 0)
+                .input('SearchQuery', sql.NVarChar, '%' + search_query + '%')
+                .input('RestauranteId', sql.Int, restauranteId)
+                .execute('PA_GET_Producto')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing foodName in query" }));
+    }
+
+});
 router.get('/productosPorRestauranteId', jwtMW, async (req, res, next) => {
 
     var restauranteId = req.query.restauranteId;
@@ -1223,7 +1285,7 @@ router.post('/producto', jwtMW, async (req, res, next) => {
     var extraId = req.body.extraId;
     var nombre = req.body.nombre;
     var descripcion = req.body.descripcion;
-    var imagenruta = req.body.imagenruta;
+    var imagen = req.body.imagen;
     var precio = req.body.precio;
     var contienePresentacion = req.body.contienePresentacion;
     var contieneExtra = req.body.contieneExtra;
@@ -1240,7 +1302,7 @@ router.post('/producto', jwtMW, async (req, res, next) => {
             .input('ExtraId', sql.Int, extraId)
             .input('Nombre', sql.NVarChar, nombre)
             .input('Descripcion', sql.NVarChar, descripcion)
-            .input('Imagen', sql.NVarChar, imagenruta)
+            .input('Imagen', sql.NVarChar, imagen)
             .input('Precio', sql.Float, precio)
             .input('ContienePresentacion', sql.Bit, contienePresentacion)
             .input('ContieneExtra', sql.Bit, contieneExtra)
@@ -1276,7 +1338,7 @@ router.put('/producto', jwtMW, async (req, res, next) => {
     var extraId = req.body.extraId;
     var nombre = req.body.nombre;
     var descripcion = req.body.descripcion;
-    var imagenruta = req.body.imagenruta;
+    var imagen = req.body.imagen;
     var precio = req.body.precio;
     var contienePresentacion = req.body.contienePresentacion;
     var contieneExtra = req.body.contieneExtra;
@@ -1293,7 +1355,7 @@ router.put('/producto', jwtMW, async (req, res, next) => {
             .input('ExtraId', sql.Int, extraId)
             .input('Nombre', sql.NVarChar, nombre)
             .input('Descripcion', sql.NVarChar, descripcion)
-            .input('Imagen', sql.NVarChar, imagenruta)
+            .input('Imagen', sql.NVarChar, imagen)
             .input('Precio', sql.Float, precio)
             .input('ContienePresentacion', sql.Bit, contienePresentacion)
             .input('ContieneExtra', sql.Bit, contieneExtra)
@@ -1357,6 +1419,7 @@ router.get('/presentacion', jwtMW, async (req, res, next) => {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('Opcion', sql.Int, 1)
+                .input('RestauranteId', sql.Int, 0)
                 .input('FoodId', sql.Int, food_id)
                 .execute('PA_GET_Presentacion')
 
@@ -1377,30 +1440,60 @@ router.get('/presentacion', jwtMW, async (req, res, next) => {
     }
 
 });
-router.get('/Allpresentaciones', jwtMW, async (req, res, next) => {
+router.get('/presentacionesPorRestaurante', jwtMW, async (req, res, next) => {
 
+    var restaurante_id = req.query.restauranteId;
+
+    if (restaurante_id != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('Opcion', sql.Int, 2)
+                .input('RestauranteId', sql.Int, restaurante_id)
+                .input('FoodId', sql.Int, 0)
+                .execute('PA_GET_Presentacion')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing restaurantid in query" }));
+    }
+
+
+
+});
+router.post('/presentacion', jwtMW, async (req, res, next) => {
+
+    var restaurante_id = req.body.restauranteId;
+    var descripcionPresentacion = req.body.descripcion;
 
     try {
         const pool = await poolPromise
         const queryResult = await pool.request()
-            .input('Opcion', sql.Int, 2)
-            .input('FoodId', sql.Int, 0)
-            .execute('PA_GET_Presentacion')
-        /*.query('Select ID as id, Descripcion as descripcion, PrecioExtra as precioTamaño FROM Tamaño WHERE ID IN'
-        +' (SELECT TamañoId FROM Producto_Tamaño WHERE ProductoId = @FoodId )')*/
+            .input('Opcion', sql.Int, 1)
+            .input('RestauranteId', sql.NVarChar, restaurante_id)
+            .input('Descripcion', sql.NVarChar, descripcionPresentacion)
+            .execute('PA_POST_PUT_Presentacion')
 
-        if (queryResult.recordset.length > 0) {
-            res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
-        }
-        else {
-            res.send(JSON.stringify({ success: false, message: "Empty" }));
-        }
+        res.send(JSON.stringify({ success: true, message: "Success" }));
     }
     catch (err) {
         res.status(500) //Internal Server Error
         res.send(JSON.stringify({ success: false, message: err.message }));
     }
-});
+
+})
+
 
 //=========================================================================
 // TABLA SLIDERS
@@ -1577,6 +1670,31 @@ router.get('/Allextras', jwtMW, async (req, res, next) => {
     }
 
 });
+router.post('/extras', jwtMW, async (req, res, next) => {
+
+    var restaurante_id = req.body.restauranteId;
+    var nombreExtra = req.body.nombre;
+    var descripcionExtra = req.body.descripcion;
+    var precio = req.body.precio;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 1)
+            .input('RestauranteId', sql.Int, restaurante_id)
+            .input('Nombre', sql.NVarChar, nombreExtra)
+            .input('Descripcion', sql.NVarChar, descripcionExtra)
+            .input('Precio', sql.Float, precio)
+            .execute('PA_POST_PUT_Extras')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
 
 //=========================================================================
 // TABLA PEDIDOS Y DETALLE DE PEDIDOS
@@ -1748,6 +1866,7 @@ router.get('/pedidos', jwtMW, async (req, res, next) => {
                 .input('OrderFBID', sql.NVarChar, order_fbid)
                 .input('StartIndex', sql.Int, startIndex)
                 .input('EndIndex', sql.Int, endIndex)
+
                 .query('SELECT * FROM  (SELECT ROW_NUMBER() OVER(ORDER BY PedidoId DESC) AS RowNum, PedidoId as pedidoId, UsuarioFBID, Celular as celular, Nombre as nombre, Direccion as direccion, Estado as estado,'
                     + ' Fecha as fecha, RestauranteId as restaurantId, TransaccionId as transaccionId, COD as cod, Total as total, NumItems as numItems'
                     + ' FROM Pedido WHERE UsuarioFBID = @OrderFBID AND NumItems > 0) AS RowConstrainedResult'
