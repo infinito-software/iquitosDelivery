@@ -639,7 +639,7 @@ router.delete('/metodoPagoPorRestaurante', jwtMW, async (req, res, next) => {
     }
 
     var fbid = decoded.fbid;
-    var restaurant_id = req.query.restaurantId;
+    var restaurant_id = req.query.restauranteId;
 
     if (fbid != null) {
 
@@ -1131,6 +1131,37 @@ router.get('/productosDesactivos', jwtMW, async (req, res, next) => {
                 .input('FoodId', sql.Int, 0)
                 .input('SearchQuery', sql.NVarChar, ' ')
                 .input('RestauranteId', sql.Int, 0)
+                .execute('PA_GET_Producto')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing menuId in query" }));
+    }
+
+});
+router.get('/productosDesactivosPorRestaurante', jwtMW, async (req, res, next) => {
+
+    var restauranteId = req.query.restauranteId;
+    if (restauranteId != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('Opcion', sql.Int, 7) //Opcion 7
+                .input('CategoriaId', sql.Int, 0)
+                .input('FoodId', sql.Int, 0)
+                .input('SearchQuery', sql.NVarChar, ' ')
+                .input('RestauranteId', sql.Int, restauranteId)
                 .execute('PA_GET_Producto')
 
             if (queryResult.recordset.length > 0) {
