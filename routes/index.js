@@ -1848,9 +1848,7 @@ router.get('/maxpedidosPorRestaurante', jwtMW, async (req, res, next) => {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('RestaurantId', sql.NVarChar, restaurantId)
-                .query('SELECT MAX(RowNum) as maxRowNum FROM (SELECT ROW_NUMBER() OVER(ORDER BY PedidoId DESC) AS RowNum, PedidoId as pedidoId, UsuarioFBID as usuarioFBID, Celular as celular, Nombre as nombre, Direccion as direccion, Estado as estado,'
-                    + 'Fecha as fecha,  RestauranteId as restaurantId, TransaccionId as transaccionId, COD as cod, Total as total, NumItems as numItems'
-                    + ' FROM Pedido WHERE RestauranteId = @RestaurantId AND NumItems > 0) AS RowConstrainedResult')
+                .execute('PA_GET_COUNTPEDIDOS')
 
             if (queryResult.recordset.length > 0) {
                 res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
