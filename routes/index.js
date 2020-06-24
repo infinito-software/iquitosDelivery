@@ -2791,7 +2791,7 @@ router.get('/repartidorPedido', jwtMW, async (req, res, next) => {
 
 });
 
-//pendiente
+//pendienteEEEEE
 router.get('/maxrepartidorPedidoPorRestaurant', jwtMW, async (req, res, next) => {
 
     var restaurantId = req.query.restaurantId;
