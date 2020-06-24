@@ -2196,6 +2196,7 @@ router.get('/pedidosPorRestaurante', jwtMW, async (req, res, next) => {
 
     var restaurantId = req.query.restaurantId;
     var estado = req.query.estado;
+    var textoBusqueda = req.query.Texto;
     var startIndex = req.query.from;
     var endIndex = req.query.to;
 
@@ -2209,8 +2210,9 @@ router.get('/pedidosPorRestaurante', jwtMW, async (req, res, next) => {
 
             const pool = await poolPromise
             const queryResult = await pool.request()
-                .input('RestaurantId', sql.NVarChar, restaurantId)
+                .input('RestaurantId', sql.Int, restaurantId)
                 .input('Estado', sql.Int, estado)
+                .input('TextoBusqueda', sql.NVarChar, textoBusqueda)
                 .input('StartIndex', sql.Int, startIndex)
                 .input('EndIndex', sql.Int, endIndex)
                 .execute('PA_GET_Pedidos_Restaurante')
