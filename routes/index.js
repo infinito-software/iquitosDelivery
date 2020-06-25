@@ -539,6 +539,110 @@ router.get('/restaurantePropietarioLogin', jwtMW, async (req, res, next) => {
 
 
 })
+router.get('/AllRestaurantesPropietarios', jwtMW, async (req, res, next) => {
+
+    var authorization = req.headers.authorization, decoded;
+    try {
+        decoded = jwt.verify(authorization.split(' ')[1], SECRET_KEY);
+    }
+    catch (e) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    var fbid = decoded.fbid;
+    if (fbid != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('Opcion', sql.Int, 4)
+                .input('Nombre', sql.NVarChar, ' ')
+                .input('Celular', sql.NVarChar, ' ')
+                .input('NroDocumento', sql.NVarChar, ' ')
+                .input('Direccion', sql.NVarChar, ' ')
+                .input('Contraseña', sql.NVarChar, ' ')
+                .input('IdTipoEmpresa', sql.Int, 0)
+                .input('HoraApertura', sql.NVarChar, ' ')
+                .input('HoraCierre', sql.NVarChar, ' ')
+                .input('PedidoMinimo', sql.Int, 0)
+                .input('Correo', sql.NVarChar, ' ')
+                .input('AtencionLunes', sql.Bit, 0)
+                .input('AtencionMartes', sql.Bit, 0)
+                .input('AtencionMiercoles', sql.Bit, 0)
+                .input('AtencionJueves', sql.Bit, 0)
+                .input('AtencionViernes', sql.Bit, 0)
+                .input('AtencionSabado', sql.Bit, 0)
+                .input('AtencionDomingo', sql.Bit, 0)
+                .input('Imagen', sql.NVarChar, ' ')
+                .input('PublicKey', sql.NVarChar, ' ')
+                .input('PrivateKey', sql.NVarChar, ' ')
+                .input('FBID', sql.NVarChar, fbid)
+                .execute('PA_POST_GET_Restaurante_Propietario')
+
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing fbid in query" }));
+    }
+
+});
+router.put('/EstadoEmpresa', jwtMW, async (req, res, next) => {
+
+    try {
+
+        var estado = req.body.estado;
+
+        var authorization = req.headers.authorization, decoded;
+        try {
+            decoded = jwt.verify(authorization.split(' ')[1], SECRET_KEY);
+        }
+        catch (e) {
+            return res.status(401).send('Unauthorized');
+        }
+
+        var fbid = decoded.fbid;
+
+        if (fbid != null) {
+            try {
+                const pool = await poolPromise
+                const queryResult = await pool.request()
+                    .input('FBID', sql.NVarChar, fbid)
+                    .input('Estado', sql.NVarChar, estado)
+                    .execute('PA_ESTADO_EMPRESA')
+
+                console.log(queryResult); //Debug to see
+
+                if (queryResult.rowsAffected != null) {
+                    res.send(JSON.stringify({ success: true, message: "Success" }))
+                }
+
+
+            }
+            catch (err) {
+                res.status(500) //Internal Server Error
+                res.send(JSON.stringify({ success: false, message: err.message }));
+            }
+        } else {
+            res.send(JSON.stringify({ success: false, message: "Missing fbid in JWT" }));
+        }
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+
+})
 
 
 //=========================================================================
