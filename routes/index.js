@@ -2818,7 +2818,7 @@ router.get('/maxrepartidorPedidoPorRestaurant', jwtMW, async (req, res, next) =>
             }
         }
         catch (err) {
-            res.status(500) //Internal Server Errorrr
+            res.status(500) //Internal Server Error
             res.send(JSON.stringify({ success: false, message: err.message }));
         }
     }
