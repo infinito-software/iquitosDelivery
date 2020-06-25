@@ -2399,6 +2399,7 @@ router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
     var nroDocComprobante = req.body.nroDocComprobante;
     var nomClienteComprobante = req.body.nomClienteComprobante;
     var dirClienteComprobante = req.body.dirClienteComprobante;
+    var recojoLocal = (req.body.recojoLocal == "true");
     //var fbid_usuario = req.body.fbidUsuario;
 
     var authorization = req.headers.authorization, decoded;
@@ -2430,10 +2431,11 @@ router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
                     .input('NroDocComprobante', sql.NVarChar, nroDocComprobante)
                     .input('NomClienteComprobante', sql.NVarChar, nomClienteComprobante)
                     .input('DirClienteComprobante', sql.NVarChar, dirClienteComprobante)
+                    .input('RecojoLocal', sql.Bit, recojoLocal == true ? 1 : 0)
                     .query('INSERT INTO Pedido'
-                        + '(UsuarioFBID, Celular, Nombre, Direccion, Estado, Fecha, RestauranteId, TransaccionId, COD, Total, NumItems, Comprobante, NroDocComprobante, NomClienteComprobante, DirClienteComprobante)'
+                        + '(UsuarioFBID, Celular, Nombre, Direccion, Estado, Fecha, RestauranteId, TransaccionId, COD, Total, NumItems, Comprobante, NroDocComprobante, NomClienteComprobante, DirClienteComprobante, RecojoLocal)'
                         + 'VALUES'
-                        + '(@FBID_USUARIO, @CelularPedido , @NombrePedido, @DireccionPedido , 0, @FechaPedido , @RestauranteId , @TransaccionId, @COD, @PrecioTotal, @NumItems , @Comprobante, @NroDocComprobante, @NomClienteComprobante, @DirClienteComprobante)'
+                        + '(@FBID_USUARIO, @CelularPedido , @NombrePedido, @DireccionPedido , 0, @FechaPedido , @RestauranteId , @TransaccionId, @COD, @PrecioTotal, @NumItems , @Comprobante, @NroDocComprobante, @NomClienteComprobante, @DirClienteComprobante, @RecojoLocal)'
                         + ' SELECT TOP 1 PedidoId as orderNumber FROM Pedido WHERE UsuarioFBID = @FBID_USUARIO ORDER BY orderNumber DESC ');
 
 
@@ -2791,7 +2793,7 @@ router.get('/repartidorPedido', jwtMW, async (req, res, next) => {
 
 });
 
-//pendienteEEEEE
+//pendiente
 router.get('/maxrepartidorPedidoPorRestaurant', jwtMW, async (req, res, next) => {
 
     var restaurantId = req.query.restaurantId;
