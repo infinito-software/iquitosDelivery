@@ -1834,6 +1834,27 @@ router.get('/slider', jwtMW, async (req, res, next) => {
     }
 
 });
+router.get('/Allslider', jwtMW, async (req, res, next) => {
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 2)
+            .execute('PA_GET_Slider')
+
+        if (queryResult.recordset.length > 0) {
+            res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+        }
+        else {
+            res.send(JSON.stringify({ success: false, message: "Empty" }));
+        }
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+});
 router.post('/slider', jwtMW, async (req, res, next) => {
 
     var imagen = req.body.imagen;
@@ -1842,8 +1863,55 @@ router.post('/slider', jwtMW, async (req, res, next) => {
     try {
         const pool = await poolPromise
         const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 1)
             .input('Imagen', sql.NVarChar, imagen)
             .input('RutaWeb', sql.NVarChar, rutaWeb)
+            .input('Estado', sql.NVarChar, ' ')
+            .execute('PA_POST_Slider')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
+router.put('/Estadoslider', jwtMW, async (req, res, next) => {
+
+    var imagen = req.body.imagen;
+    var estado = req.body.estado;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 2)
+            .input('Imagen', sql.NVarChar, imagen)
+            .input('RutaWeb', sql.NVarChar, ' ')
+            .input('Estado', sql.NVarChar, estado)
+            .execute('PA_POST_Slider')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
+router.put('/slider', jwtMW, async (req, res, next) => {
+
+    var imagen = req.body.imagen;
+    var rutaWeb = req.body.rutaWeb;
+    var estado = req.body.estado;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 3)
+            .input('Imagen', sql.NVarChar, imagen)
+            .input('RutaWeb', sql.NVarChar, rutaWeb)
+            .input('Estado', sql.NVarChar, estado)
             .execute('PA_POST_Slider')
 
         res.send(JSON.stringify({ success: true, message: "Success" }));
