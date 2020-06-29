@@ -16,6 +16,14 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+const cloudinary = require('cloudinary').v2
+
+// cloudinary configuration
+cloudinary.config({
+    cloud_name: "htvzharyc",
+    api_key: "532837173573631",
+    api_secret: "nbnJrS64OHVeGeY0QkeGATyLlwc"
+});
 
 var jwt = require('jsonwebtoken');
 var exjwt = require('express-jwt');
@@ -474,7 +482,7 @@ router.get('/restaurantePropietarioLogin', jwtMW, async (req, res, next) => {
 
     try {
 
-        var nroDocumento = req.query.NroDocumento;
+        var nroDocumento = req.query.NroDocumento;   
         var contraseña = req.query.Contraseña;
 
         var authorization = req.headers.authorization, decoded;
@@ -615,7 +623,7 @@ router.put('/EstadoEmpresa', jwtMW, async (req, res, next) => {
         if (fbid != null) {
             try {
                 const pool = await poolPromise
-                const queryResult = await pool.request()
+                const queryResult = await pool.request()                  
                     .input('FBID', sql.NVarChar, fbid)
                     .input('Estado', sql.NVarChar, estado)
                     .execute('PA_ESTADO_EMPRESA')
@@ -1234,7 +1242,7 @@ router.post('/categoria', jwtMW, async (req, res, next) => {
     var color1 = req.body.color1;
     var color2 = req.body.color2;
     var imagen = req.body.imagen;
-
+    
 
     try {
         const pool = await poolPromise
@@ -1549,14 +1557,16 @@ router.post('/producto', jwtMW, async (req, res, next) => {
             .output('RptaId')
             .execute('PA_POST_PUT_Producto')
 
-        if (queryResult.output != null) {
+        if (queryResult.output != null)
+        {
             const ID = queryResult.output.RptaId
             res.end(JSON.stringify({ success: true, message: ID }));
-        }
-        else {
+        }        
+        else
+        {
             res.send(JSON.stringify({ success: false, message: err.message }))
         }
-
+        
     }
     catch (err) {
         res.status(500) //Internal Server Error
@@ -1569,14 +1579,14 @@ router.post('/productoPresentacion', jwtMW, async (req, res, next) => {
     var productoId = req.body.productoId;
     var presentacionId = req.body.presentacionId;
     var precioPresentacion = req.body.precioPresentacion;
-
+  
     try {
         const pool = await poolPromise
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 1) //Opcion 1
-            .input('ProductoId', sql.Int, productoId)
+            .input('ProductoId', sql.Int, productoId)       
             .input('PresentacionId', sql.Int, presentacionId)
-            .input('Precio', sql.Float, precioPresentacion)
+            .input('Precio', sql.Float, precioPresentacion)          
             .execute('PA_POST_PUT_Producto_Presentacion')
 
         res.send(JSON.stringify({ success: true, message: "Success" }));
@@ -1616,6 +1626,18 @@ router.post('/subirImagenproducto', jwtMW, upload.single('imagen'), async (req, 
 
 
 })
+
+router.post("/subirImagen", jwtMW, upload.single('imagen'), async (req, res, next) => {
+    // collected image from a user
+    const data = {
+        image: req.file,
+    }
+
+    // upload image here
+    cloudinary.uploader.upload(data.image);
+
+});
+
 router.put('/producto', jwtMW, async (req, res, next) => {
 
     var productoId = req.body.productoId;
@@ -1741,7 +1763,7 @@ router.get('/presentacionesPorRestaurante', jwtMW, async (req, res, next) => {
                 .input('RestauranteId', sql.Int, restaurante_id)
                 .input('FoodId', sql.Int, 0)
                 .execute('PA_GET_Presentacion')
-
+         
             if (queryResult.recordset.length > 0) {
                 res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
             }
@@ -1759,7 +1781,7 @@ router.get('/presentacionesPorRestaurante', jwtMW, async (req, res, next) => {
     }
 
 
-
+    
 });
 router.post('/presentacion', jwtMW, async (req, res, next) => {
 
@@ -1865,13 +1887,13 @@ router.post('/slider', jwtMW, async (req, res, next) => {
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 1)
             .input('Imagen', sql.NVarChar, imagen)
-            .input('RutaWeb', sql.NVarChar, rutaWeb)
+            .input('RutaWeb', sql.NVarChar, rutaWeb)   
             .input('Estado', sql.NVarChar, ' ')
             .execute('PA_POST_Slider')
 
         res.send(JSON.stringify({ success: true, message: "Success" }));
     }
-    catch (err) {
+        catch (err) {
         res.status(500) //Internal Server Error
         res.send(JSON.stringify({ success: false, message: err.message }));
     }
@@ -2312,7 +2334,7 @@ router.get('/hotusuarios', jwtMW, async (req, res, next) => {
             const queryResult = await pool.request()
                 .input('RestauranteId', sql.Int, restaurante_id)
                 .execute('PA_HotUsuarios')
-
+         
 
             if (queryResult.recordset.length > 0) {
                 res.send(JSON.stringify({ success: true, result: queryResult.recordset }));

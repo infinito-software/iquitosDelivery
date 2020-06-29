@@ -31,4 +31,4 @@ app.use(function (err, req, res, next) {
 
 app.use("/", routes);
 
-app.listen(PORT, () => { console.log("IQUITOS DELIVERY API RUNNING") });
+app.listen(PORT, () => { console.log("detoo API RUNNING") });
