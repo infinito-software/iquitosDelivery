@@ -2690,10 +2690,9 @@ router.post('/ActualizarPedido', jwtMW, async (req, res, next) => {
                     order_detail[i]["foodId"],
                     order_detail[i]["foodQuantity"],
                     order_detail[i]["foodPrice"],
-                    order_detail[i]["foodSize"],
-                    order_detail[i]["foodAddon"],
+                    order_detail[i]["foodSize"],                   
                     parseFloat(order_detail[i]["foodExtraPrice"]),
-                )
+                    order_detail[i]["foodAddon"])
             }
 
             const request = pool.request()
