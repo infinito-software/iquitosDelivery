@@ -1608,6 +1608,36 @@ router.post('/productoExtra', jwtMW, async (req, res, next) => {
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 1) //Opcion 1
             .input('ProductoId', sql.Int, productoId)
+            .input('IdPreProd', sql.Int, 0)
+            .input('ExtraId', sql.Int, extraId)
+            .execute('PA_POST_PUT_Producto_Extra')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
+router.post('/subirImagenproducto', jwtMW, upload.single('imagen'), async (req, res, next) => {
+
+    console.log(req.file);
+
+
+})
+router.post('/presentacionproductoExtra', jwtMW, async (req, res, next) => {
+
+    var idPreProd = req.body.IdPreProd;
+    var extraId = req.body.extraId;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 2) //Opcion 2
+            .input('ProductoId', sql.Int, 0)
+            .input('IdPreProd', sql.Int, idPreProd)
             .input('ExtraId', sql.Int, extraId)
             .execute('PA_POST_PUT_Producto_Extra')
 
