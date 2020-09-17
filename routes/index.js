@@ -2019,11 +2019,13 @@ router.post('/valoracionEmpresa', jwtMW, async (req, res, next) => {
 router.get('/extras', jwtMW, async (req, res, next) => {
 
     var food_id = req.query.foodId;
-    if (food_id != null) {
+    var idPreProd = req.query.IdPreProd;
+    if (food_id != null || idPreProd != null) {
         try {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('Opcion', sql.Int, 1)
+                .input('IdPreProd', sql.Int, idPreProd)
                 .input('FoodId', sql.Int, food_id)
                 .input('RestaurantId', sql.Int, 0)
                 .execute('PA_GET_Extra')
@@ -2055,6 +2057,7 @@ router.get('/extrasPorRestaurante', jwtMW, async (req, res, next) => {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('Opcion', sql.Int, 2)
+                .input('IdPreProd', sql.Int, 0)
                 .input('FoodId', sql.Int, 0)
                 .input('RestaurantId', sql.Int, restaurante_id)
                 .execute('PA_GET_Extra')
@@ -2084,6 +2087,7 @@ router.get('/Allextras', jwtMW, async (req, res, next) => {
         const pool = await poolPromise
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 3)
+            .input('IdPreProd', sql.Int, 0)
             .input('FoodId', sql.Int, 0)
             .input('RestaurantId', sql.Int, restaurante_id)
             .execute('PA_GET_Extra')
