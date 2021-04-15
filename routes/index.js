@@ -18,12 +18,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const cloudinary = require('cloudinary').v2
 
-// cloudinary configuration
-cloudinary.config({
-    cloud_name: "htvzharyc",
-    api_key: "532837173573631",
-    api_secret: "nbnJrS64OHVeGeY0QkeGATyLlwc"
-});
 
 var jwt = require('jsonwebtoken');
 var exjwt = require('express-jwt');
@@ -166,7 +160,6 @@ router.get('/descuentoPorEmpresa', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.get('/checkdescuento', jwtMW, async (req, res, next) => {
 
     var authorization = req.headers.authorization, decoded;
@@ -207,7 +200,6 @@ router.get('/checkdescuento', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.post('/aplicarDescuento', jwtMW, async (req, res, next) => {
 
     var authorization = req.headers.authorization, decoded;
@@ -651,7 +643,6 @@ router.put('/EstadoEmpresa', jwtMW, async (req, res, next) => {
 
 
 })
-
 
 //=========================================================================
 // TABLA TipoEmpresa
@@ -1198,8 +1189,6 @@ router.get('/buscarEmpresa', jwtMW, async (req, res, next) => {
 
 });
 
-
-
 //=========================================================================
 // TABLA MENU
 // GET / POST
@@ -1427,6 +1416,60 @@ router.get('/productosPorId', jwtMW, async (req, res, next) => {
     }
 
 });
+router.get('/productos_Extras', jwtMW, async (req, res, next) => {
+
+    var productoId = req.query.productoId;
+    if (productoId != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('ProductoId', sql.Int, productoId) 
+                .execute('PA_GET_Producto_Extra')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing foodId in query" }));
+    }
+
+});
+router.get('/productos_Presentaciones', jwtMW, async (req, res, next) => {
+
+    var productoId = req.query.productoId;
+    if (productoId != null) {
+        try {
+            const pool = await poolPromise
+            const queryResult = await pool.request()
+                .input('ProductoId', sql.Int, productoId)
+                .execute('PA_GET_Producto_Presentacion')
+
+            if (queryResult.recordset.length > 0) {
+                res.send(JSON.stringify({ success: true, result: queryResult.recordset }));
+            }
+            else {
+                res.send(JSON.stringify({ success: false, message: "Empty" }));
+            }
+        }
+        catch (err) {
+            res.status(500) //Internal Server Error
+            res.send(JSON.stringify({ success: false, message: err.message }));
+        }
+    }
+    else {
+        res.send(JSON.stringify({ success: false, message: "Missing foodId in query" }));
+    }
+
+});
 router.get('/BuscarProducto', jwtMW, async (req, res, next) => {
 
     var search_query = req.query.foodName;
@@ -1600,6 +1643,36 @@ router.post('/productoPresentacion', jwtMW, async (req, res, next) => {
     }
 
 })
+router.delete('/productoPresentacion', jwtMW, async (req, res, next) => {
+
+    var authorization = req.headers.authorization, decoded;
+    try {
+        decoded = jwt.verify(authorization.split(' ')[1], SECRET_KEY);
+    }
+    catch (e) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    var productoId = req.query.productoId;
+    var presentacionId = req.query.presentacionId;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 2) //Opcion 2
+            .input('ProductoId', sql.Int, productoId)
+            .input('PresentacionId', sql.Int, presentacionId)
+            .input('Precio', sql.Float, 0)
+            .execute('PA_POST_PUT_Producto_Presentacion')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
 router.post('/productoExtra', jwtMW, async (req, res, next) => {
 
     var productoId = req.body.productoId;
@@ -1610,7 +1683,6 @@ router.post('/productoExtra', jwtMW, async (req, res, next) => {
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 1) //Opcion 1
             .input('ProductoId', sql.Int, productoId)
-            .input('IdPreProd', sql.Int, 0)
             .input('ExtraId', sql.Int, extraId)
             .execute('PA_POST_PUT_Producto_Extra')
 
@@ -1623,28 +1695,28 @@ router.post('/productoExtra', jwtMW, async (req, res, next) => {
     }
 
 })
-router.post('/subirImagenproducto', jwtMW, upload.single('imagen'), async (req, res, next) => {
+router.delete('/productoExtra', jwtMW, async (req, res, next) => {
 
-    console.log(req.file);
+    var authorization = req.headers.authorization, decoded;
+    try {
+        decoded = jwt.verify(authorization.split(' ')[1], SECRET_KEY);
+    }
+    catch (e) {
+        return res.status(401).send('Unauthorized');
+    }
 
-
-})
-router.post('/presentacionproductoExtra', jwtMW, async (req, res, next) => {
-
-    var idPreProd = req.body.IdPreProd;
-    var extraId = req.body.extraId;
+    var productoId = req.query.productoId;
+    var extraId = req.query.extraId;
 
     try {
         const pool = await poolPromise
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 2) //Opcion 2
-            .input('ProductoId', sql.Int, 0)
-            .input('IdPreProd', sql.Int, idPreProd)
+            .input('ProductoId', sql.Int, productoId)
             .input('ExtraId', sql.Int, extraId)
             .execute('PA_POST_PUT_Producto_Extra')
 
         res.send(JSON.stringify({ success: true, message: "Success" }));
-
     }
     catch (err) {
         res.status(500) //Internal Server Error
@@ -1659,16 +1731,6 @@ router.post('/subirImagenproducto', jwtMW, upload.single('imagen'), async (req, 
 
 })
 
-router.post("/subirImagen", jwtMW, upload.single('imagen'), async (req, res, next) => {
-    // collected image from a user
-    const data = {
-        image: req.file,
-    }
-
-    // upload image here
-    cloudinary.uploader.upload(data.image);
-
-});
 
 router.put('/producto', jwtMW, async (req, res, next) => {
 
@@ -1863,7 +1925,6 @@ router.put('/presentacion', jwtMW, async (req, res, next) => {
 
 })
 
-
 //=========================================================================
 // TABLA SLIDERS
 // GET
@@ -2053,13 +2114,11 @@ router.post('/valoracionEmpresa', jwtMW, async (req, res, next) => {
 router.get('/extras', jwtMW, async (req, res, next) => {
 
     var food_id = req.query.foodId;
-    var idPreProd = req.query.IdPreProd;
-    if (food_id != null || idPreProd != null) {
+    if (food_id != null) {
         try {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('Opcion', sql.Int, 1)
-                .input('IdPreProd', sql.Int, idPreProd)
                 .input('FoodId', sql.Int, food_id)
                 .input('RestaurantId', sql.Int, 0)
                 .execute('PA_GET_Extra')
@@ -2091,7 +2150,6 @@ router.get('/extrasPorRestaurante', jwtMW, async (req, res, next) => {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('Opcion', sql.Int, 2)
-                .input('IdPreProd', sql.Int, 0)
                 .input('FoodId', sql.Int, 0)
                 .input('RestaurantId', sql.Int, restaurante_id)
                 .execute('PA_GET_Extra')
@@ -2121,7 +2179,6 @@ router.get('/Allextras', jwtMW, async (req, res, next) => {
         const pool = await poolPromise
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 3)
-            .input('IdPreProd', sql.Int, 0)
             .input('FoodId', sql.Int, 0)
             .input('RestaurantId', sql.Int, restaurante_id)
             .execute('PA_GET_Extra')
@@ -2423,7 +2480,6 @@ router.get('/detPedidosPorRestaurante', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.get('/pedidosPorRestaurante', jwtMW, async (req, res, next) => {
 
     var restaurantId = req.query.restaurantId;
@@ -2467,7 +2523,6 @@ router.get('/pedidosPorRestaurante', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.get('/maxpedidosPorRestaurante', jwtMW, async (req, res, next) => {
 
     var restaurantId = req.query.restaurantId;
@@ -2497,7 +2552,6 @@ router.get('/maxpedidosPorRestaurante', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.get('/pedidos', jwtMW, async (req, res, next) => {
 
     var authorization = req.headers.authorization, decoded;
@@ -2544,7 +2598,6 @@ router.get('/pedidos', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.get('/maxpedidos', jwtMW, async (req, res, next) => {
 
     var authorization = req.headers.authorization, decoded;
@@ -2585,7 +2638,6 @@ router.get('/maxpedidos', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.get('/detPedidos', jwtMW, async (req, res, next) => {
 
     var order_id = req.query.orderID;
@@ -2615,7 +2667,6 @@ router.get('/detPedidos', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
 
     var celular_pedido = req.body.celularPedido;
@@ -2694,7 +2745,6 @@ router.post('/AgregarPedido', jwtMW, async (req, res, next) => {
     }
 
 })
-
 router.post('/ActualizarPedido', jwtMW, async (req, res, next) => {
 
     var order_id = req.body.orderId;
@@ -2728,9 +2778,10 @@ router.post('/ActualizarPedido', jwtMW, async (req, res, next) => {
                     order_detail[i]["foodId"],
                     order_detail[i]["foodQuantity"],
                     order_detail[i]["foodPrice"],
-                    order_detail[i]["foodSize"],                   
-                    parseFloat(order_detail[i]["foodExtraPrice"]),
-                    order_detail[i]["foodAddon"])
+                    order_detail[i]["foodSize"],
+                    parseFloat(order_detail[i]["foodExtraPrice"],
+                        order_detail[i]["foodAddon"]),
+                )
             }
 
             const request = pool.request()
@@ -2752,7 +2803,6 @@ router.post('/ActualizarPedido', jwtMW, async (req, res, next) => {
         res.send(JSON.stringify({ success: false, message: "Missing orderID OR order_detail in body of POST request" }));
     }
 })
-
 router.put('/ActualizarPedido', jwtMW, async (req, res, next) => {
 
     var order_id = req.body.orderId;
@@ -2822,7 +2872,6 @@ router.get('/favoritos', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.get('/favoritosPorRestaurante', jwtMW, async (req, res, next) => {
 
     var authorization = req.headers.authorization, decoded;
@@ -2861,7 +2910,6 @@ router.get('/favoritosPorRestaurante', jwtMW, async (req, res, next) => {
     }
 
 });
-
 router.post('/favoritos', jwtMW, async (req, res, next) => {
 
 
@@ -2909,7 +2957,6 @@ router.post('/favoritos', jwtMW, async (req, res, next) => {
     }
 
 })
-
 router.delete('/favoritos', jwtMW, async (req, res, next) => {
 
 
@@ -2952,7 +2999,6 @@ router.delete('/favoritos', jwtMW, async (req, res, next) => {
 // POST / GET
 //=========================================================================
 
-
 router.post('/repartidorPedido', jwtMW, async (req, res, next) => {
 
     var orderId = req.body.orderId;
@@ -2981,7 +3027,6 @@ router.post('/repartidorPedido', jwtMW, async (req, res, next) => {
     }
 
 })
-
 router.get('/repartidorPedido', jwtMW, async (req, res, next) => {
 
     var restaurantId = req.query.restaurantId;
