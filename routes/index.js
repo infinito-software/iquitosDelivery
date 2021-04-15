@@ -1707,6 +1707,7 @@ router.post('/productoExtra', jwtMW, async (req, res, next) => {
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 1) //Opcion 1
             .input('ProductoId', sql.Int, productoId)
+            .input('IdPreProd', sql.Int, 0)
             .input('ExtraId', sql.Int, extraId)
             .execute('PA_POST_PUT_Producto_Extra')
 
@@ -1729,18 +1730,42 @@ router.delete('/productoExtra', jwtMW, async (req, res, next) => {
         return res.status(401).send('Unauthorized');
     }
 
-    var productoId = req.query.productoId;
-    var extraId = req.query.extraId;
+    var idPreProd = req.body.IdPreProd;
+    var extraId = req.body.extraId;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 3) //Opcion 3
+            .input('ProductoId', sql.Int, 0)
+            .input('IdPreProd', sql.Int, idPreProd)
+            .input('ExtraId', sql.Int, extraId)
+            .execute('PA_POST_PUT_Producto_Extra')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
+router.post('/presentacionproductoExtra', jwtMW, async (req, res, next) => {
+
+    var idPreProd = req.body.IdPreProd;
+    var extraId = req.body.extraId;
 
     try {
         const pool = await poolPromise
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 2) //Opcion 2
-            .input('ProductoId', sql.Int, productoId)
+            .input('ProductoId', sql.Int, 0)
+            .input('IdPreProd', sql.Int, idPreProd)
             .input('ExtraId', sql.Int, extraId)
             .execute('PA_POST_PUT_Producto_Extra')
 
         res.send(JSON.stringify({ success: true, message: "Success" }));
+
     }
     catch (err) {
         res.status(500) //Internal Server Error
