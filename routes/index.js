@@ -2138,11 +2138,13 @@ router.post('/valoracionEmpresa', jwtMW, async (req, res, next) => {
 router.get('/extras', jwtMW, async (req, res, next) => {
 
     var food_id = req.query.foodId;
-    if (food_id != null) {
+    var idPreProd = req.query.IdPreProd;
+    if (food_id != null || idPreProd != null) {
         try {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('Opcion', sql.Int, 1)
+                .input('IdPreProd', sql.Int, idPreProd)
                 .input('FoodId', sql.Int, food_id)
                 .input('RestaurantId', sql.Int, 0)
                 .execute('PA_GET_Extra')
