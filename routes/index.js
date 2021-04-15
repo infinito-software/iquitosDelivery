@@ -1643,6 +1643,30 @@ router.post('/productoPresentacion', jwtMW, async (req, res, next) => {
     }
 
 })
+router.put('/productoPresentacion', jwtMW, async (req, res, next) => {
+
+    var productoId = req.body.productoId;
+    var presentacionId = req.body.presentacionId;
+    var precioPresentacion = req.body.precioPresentacion;
+
+    try {
+        const pool = await poolPromise
+        const queryResult = await pool.request()
+            .input('Opcion', sql.Int, 3) //Opcion 3
+            .input('ProductoId', sql.Int, productoId)
+            .input('PresentacionId', sql.Int, presentacionId)
+            .input('Precio', sql.Float, precioPresentacion)
+            .execute('PA_POST_PUT_Producto_Presentacion')
+
+        res.send(JSON.stringify({ success: true, message: "Success" }));
+
+    }
+    catch (err) {
+        res.status(500) //Internal Server Error
+        res.send(JSON.stringify({ success: false, message: err.message }));
+    }
+
+})
 router.delete('/productoPresentacion', jwtMW, async (req, res, next) => {
 
     var authorization = req.headers.authorization, decoded;
