@@ -1536,6 +1536,7 @@ router.post('/producto', jwtMW, async (req, res, next) => {
     var contienePresentacion = req.body.contienePresentacion;
     var contieneExtra = req.body.contieneExtra;
     var descuento = req.body.descuento;
+    var codigo = req.body.codigo;
 
     try {
         const pool = await poolPromise
@@ -1554,6 +1555,7 @@ router.post('/producto', jwtMW, async (req, res, next) => {
             .input('ContieneExtra', sql.Bit, contieneExtra)
             .input('Descuento', sql.Int, descuento)
             .input('Estado', sql.Bit, 1)
+            .input('Codigo', sql.VarChar, codigo)
             .output('RptaId')
             .execute('PA_POST_PUT_Producto')
 
@@ -1682,6 +1684,7 @@ router.put('/producto', jwtMW, async (req, res, next) => {
     var contienePresentacion = req.body.contienePresentacion;
     var contieneExtra = req.body.contieneExtra;
     var descuento = req.body.descuento;
+    var codigo = req.body.codigo;
 
     try {
         const pool = await poolPromise
@@ -1700,6 +1703,7 @@ router.put('/producto', jwtMW, async (req, res, next) => {
             .input('ContieneExtra', sql.Bit, contieneExtra)
             .input('Descuento', sql.Float, descuento)
             .input('Estado', sql.NVarChar, ' ')
+            .input('Codigo', sql.VarChar, codigo)
             .output('RptaId')
             .execute('PA_POST_PUT_Producto')
 
