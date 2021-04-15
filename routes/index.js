@@ -2176,6 +2176,7 @@ router.get('/extrasPorRestaurante', jwtMW, async (req, res, next) => {
             const pool = await poolPromise
             const queryResult = await pool.request()
                 .input('Opcion', sql.Int, 2)
+                .input('IdPreProd', sql.Int, 0)
                 .input('FoodId', sql.Int, 0)
                 .input('RestaurantId', sql.Int, restaurante_id)
                 .execute('PA_GET_Extra')
@@ -2205,6 +2206,7 @@ router.get('/Allextras', jwtMW, async (req, res, next) => {
         const pool = await poolPromise
         const queryResult = await pool.request()
             .input('Opcion', sql.Int, 3)
+            .input('IdPreProd', sql.Int, 0)
             .input('FoodId', sql.Int, 0)
             .input('RestaurantId', sql.Int, restaurante_id)
             .execute('PA_GET_Extra')
