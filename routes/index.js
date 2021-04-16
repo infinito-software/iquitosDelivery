@@ -1730,8 +1730,8 @@ router.delete('/productoExtra', jwtMW, async (req, res, next) => {
         return res.status(401).send('Unauthorized');
     }
 
-    var idPreProd = req.body.IdPreProd;
-    var extraId = req.body.extraId;
+    var idPreProd = req.query.IdPreProd;
+    var extraId = req.query.extraId;
 
     try {
         const pool = await poolPromise
